@@ -5,7 +5,7 @@ region = "us-east-2"
 #aws_launch config for ec2 for autoscaling group
 resource "aws_launch_configuration" "webcluster" {
 name = "ruby_AWS_LC"
-image_id= "ami-0c209b87f96c6444f"
+image_id= "ami-05c1fa8df71875112"
 instance_type = "t2.micro"
 security_groups = ["${aws_security_group.websg.id}"]
 key_name = "abhi"
