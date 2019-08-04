@@ -11,8 +11,27 @@ security_groups = ["${aws_security_group.websg.id}"]
 key_name = "abhi"
 user_data = <<-EOF
 #!/bin/bash
-sudo su root
-docker start a08051019de3
+sudo apt-get remove docker docker-engine docker.io containerd runc
+sudo apt-get -y update
+sudo apt-get -y install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get -y install docker-ce docker-ce-cli containerd.io
+apt-cache madison docker-ce
+git clone https://github.com/abhirup92/rubyONrailsG2.git
+cd rubyONrailsG2/
+sudo docker build -t "ruby_image" .
+sudo docker run -p 3000:3000 --name "ruby_container" -t ruby_image
 EOF
 
 lifecycle {
@@ -24,8 +43,8 @@ resource "aws_autoscaling_group" "aws_autoscaling_group" {
 name = "g2_autoscale"
 launch_configuration = "${aws_launch_configuration.webcluster.name}"
 availability_zones = ["us-east-2a", "us-east-2b", "us-east-2c"]
-min_size = 1
-max_size = 3
+min_size = 2
+max_size = 4
 enabled_metrics = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupTotalInstances"]
 metrics_granularity="1Minute"
 load_balancers= ["${aws_elb.elb1.id}"]
